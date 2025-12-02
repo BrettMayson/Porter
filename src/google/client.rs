@@ -310,9 +310,54 @@ impl GoogleWalletClient {
         .await
     }
 
-    /// Generate a save URL for a pass
-    pub fn generate_save_url(&self, object_id: &str) -> String {
-        format!("https://pay.google.com/gp/v/save/{}", object_id)
+    /// Generate a JWT for a pass object
+    fn generate_pass_jwt(&self, objects: &[GenericObject]) -> Result<String> {
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map_err(|e| PorterError::AuthError(format!("Time error: {}", e)))?
+            .as_secs() as i64;
+
+        let payload = JwtPayload {
+            iss: self.config.service_account_email.clone(),
+            aud: "google".to_string(),
+            typ: "savetowallet".to_string(),
+            iat: now,
+            origins: None,
+            payload: JwtObjectPayload {
+                generic_objects: Some(objects.to_vec()),
+                event_ticket_objects: None,
+                loyalty_objects: None,
+            },
+        };
+
+        let key = EncodingKey::from_rsa_pem(self.config.private_key.as_bytes())?;
+        let token = encode(&Header::new(Algorithm::RS256), &payload, &key)?;
+
+        Ok(token)
+    }
+
+    /// Generate a save URL for a generic pass object
+    /// 
+    /// This creates a JWT and calls the Google Wallet API to get a save URL
+    /// that can be used to add the pass to a user's wallet.
+    pub async fn generate_save_url(&mut self, object: &GenericObject) -> Result<String> {
+        let jwt = self.generate_pass_jwt(std::slice::from_ref(object))?;
+        
+        let jwt_resource = JwtResource { jwt };
+        
+        let response: JwtInsertResponse = self.request(
+            reqwest::Method::POST,
+            "/jwt",
+            Some(&jwt_resource),
+        )
+        .await?;
+
+        response.save_uri.ok_or_else(|| {
+            PorterError::ApiError {
+                status: 500,
+                message: "No save URI returned from API".to_string(),
+            }
+        })
     }
 }
 

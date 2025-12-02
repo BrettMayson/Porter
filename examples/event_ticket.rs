@@ -1,5 +1,5 @@
 use porter::google::{
-    Barcode, EventSeat, EventTicketObject, GoogleWalletClient, GoogleWalletConfig,
+    Barcode, EventSeat, EventTicketObject, GenericObject, GoogleWalletClient, GoogleWalletConfig,
     LocalizedString, TranslatedString,
 };
 use porter::error::Result;
@@ -69,7 +69,17 @@ async fn main() -> Result<()> {
     }
 
     // Generate save URL
-    let save_url = client.generate_save_url(&ticket_id);
+    // Note: We need to get the full object for JWT generation
+    // For event tickets, we'd typically use eventTicketObjects in the JWT
+    // For simplicity here, we'll use the generic object pattern
+    let generic_obj = GenericObject {
+        id: created_ticket.id.clone(),
+        class_id: created_ticket.class_id.clone(),
+        state: created_ticket.state.clone(),
+        barcode: created_ticket.barcode.clone(),
+        ..Default::default()
+    };
+    let save_url = client.generate_save_url(&generic_obj).await?;
     println!("\n🎫 Add ticket to Google Wallet:");
     println!("{}", save_url);
 

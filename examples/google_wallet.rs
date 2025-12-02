@@ -34,7 +34,7 @@ async fn main() -> Result<()> {
 
     // Step 2: Create a pass (object)
     println!("\nCreating a pass...");
-    let pass_id = format!("{}.example_pass_001", config.issuer_id);
+    let pass_id = format!("{}.example_pass_003", config.issuer_id);
     let pass = GenericObject {
         id: pass_id.clone(),
         class_id: class_id.clone(),
@@ -116,7 +116,8 @@ async fn main() -> Result<()> {
     println!("✓ Found {} passes", count);
 
     // Step 7: Generate save URL
-    let save_url = client.generate_save_url(&pass_id);
+    let pass = client.get_generic_object(&pass_id).await?;
+    let save_url = client.generate_save_url(&pass).await?;
     println!("\n📱 Add to Google Wallet:");
     println!("{}", save_url);
 

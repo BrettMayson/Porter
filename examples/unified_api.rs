@@ -94,11 +94,11 @@ async fn main() -> Result<()> {
     .build();
 
     let updated_google: GenericObject = updated_unified.into();
-    client.update_generic_object(&created_pass.id, &updated_google).await?;
+    let updated_pass = client.update_generic_object(&created_pass.id, &updated_google).await?;
     println!("✓ Pass updated");
 
     // Generate save URL
-    let save_url = client.generate_save_url(&created_pass.id);
+    let save_url = client.generate_save_url(&updated_pass).await?;
     println!("\n🎫 Add to Google Wallet:");
     println!("{}", save_url);
 

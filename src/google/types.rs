@@ -202,3 +202,42 @@ pub struct LoyaltyPointsBalance {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub double: Option<f64>,
 }
+
+/// JWT payload for creating save URLs
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct JwtPayload {
+    pub iss: String, // Issuer (service account email)
+    pub aud: String, // Audience (should be "google")
+    pub typ: String, // Type (should be "savetowallet")
+    pub iat: i64,    // Issued at timestamp
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub origins: Option<Vec<String>>,
+    pub payload: JwtObjectPayload,
+}
+
+/// Container for objects to be saved
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct JwtObjectPayload {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub generic_objects: Option<Vec<GenericObject>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub event_ticket_objects: Option<Vec<EventTicketObject>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub loyalty_objects: Option<Vec<LoyaltyObject>>,
+}
+
+/// Request body for JWT insert endpoint
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct JwtResource {
+    pub jwt: String,
+}
+
+/// Response from JWT insert endpoint
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct JwtInsertResponse {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub save_uri: Option<String>,
+}
