@@ -1,0 +1,22 @@
+[package]
+name = "porter"
+version = "0.1.0"
+edition = "2021"
+authors = ["Brett Mayson"]
+description = "A unified API for managing Google Wallet and Apple Wallet passes"
+repository = "https://github.com/BrettMayson/porter"
+license = "MIT"
+keywords = ["google-wallet", "apple-wallet", "passes", "tickets", "loyalty"]
+categories = ["api-bindings", "authentication"]
+readme = "README.md"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], default-features = false }
+tokio = { version = "1.0", features = ["full"] }
+thiserror = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+jsonwebtoken = "9.0"
+base64 = "0.22"
+async-trait = "0.1"

@@ -1,0 +1,37 @@
+# Rust
+/target
+Cargo.lock
+**/*.rs.bk
+*.pdb
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Credentials (important for wallet APIs)
+*.pem
+*.key
+service-account-key.pem
+private-key.pem
+
+# Environment
+.env
+.env.local
+
+# Build artifacts
+*.o
+*.so
+*.dylib
+*.dll
+
+# Documentation
+target/doc/
+
+# Test coverage
+*.profraw
+*.profdata
+
