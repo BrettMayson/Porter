@@ -1,13 +1,13 @@
 use serde::{Deserialize, Serialize};
 
 /// Apple Wallet Pass (stub for future implementation)
-/// 
+///
 /// Apple Wallet uses the PKPass format which requires:
 /// - A pass.json file with pass data
 /// - Images (icon, logo, background, etc.)
 /// - A manifest.json file listing all files and their SHA1 hashes
 /// - A signature file for the manifest
-/// 
+///
 /// This will be implemented in a future version.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ApplePass {

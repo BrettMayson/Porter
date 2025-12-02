@@ -110,11 +110,10 @@ impl GoogleWalletClient {
         }
 
         let token_response: TokenResponse = response.json().await?;
-        
+
         self.access_token = Some(token_response.access_token.clone());
-        self.token_expiry = Some(
-            SystemTime::now() + Duration::from_secs(token_response.expires_in)
-        );
+        self.token_expiry =
+            Some(SystemTime::now() + Duration::from_secs(token_response.expires_in));
 
         Ok(token_response.access_token)
     }
@@ -156,12 +155,8 @@ impl GoogleWalletClient {
 
     /// Create a generic class
     pub async fn create_generic_class(&mut self, class: &GenericClass) -> Result<GenericClass> {
-        self.request(
-            reqwest::Method::POST,
-            "/genericClass",
-            Some(class),
-        )
-        .await
+        self.request(reqwest::Method::POST, "/genericClass", Some(class))
+            .await
     }
 
     /// Get a generic class
@@ -175,7 +170,11 @@ impl GoogleWalletClient {
     }
 
     /// Update a generic class
-    pub async fn update_generic_class(&mut self, class_id: &str, class: &GenericClass) -> Result<GenericClass> {
+    pub async fn update_generic_class(
+        &mut self,
+        class_id: &str,
+        class: &GenericClass,
+    ) -> Result<GenericClass> {
         self.request(
             reqwest::Method::PUT,
             &format!("/genericClass/{}", class_id),
@@ -186,12 +185,8 @@ impl GoogleWalletClient {
 
     /// Create a generic object (pass)
     pub async fn create_generic_object(&mut self, object: &GenericObject) -> Result<GenericObject> {
-        self.request(
-            reqwest::Method::POST,
-            "/genericObject",
-            Some(object),
-        )
-        .await
+        self.request(reqwest::Method::POST, "/genericObject", Some(object))
+            .await
     }
 
     /// Get a generic object
@@ -205,7 +200,11 @@ impl GoogleWalletClient {
     }
 
     /// Update a generic object
-    pub async fn update_generic_object(&mut self, object_id: &str, object: &GenericObject) -> Result<GenericObject> {
+    pub async fn update_generic_object(
+        &mut self,
+        object_id: &str,
+        object: &GenericObject,
+    ) -> Result<GenericObject> {
         self.request(
             reqwest::Method::PUT,
             &format!("/genericObject/{}", object_id),
@@ -215,7 +214,11 @@ impl GoogleWalletClient {
     }
 
     /// Patch a generic object (partial update)
-    pub async fn patch_generic_object(&mut self, object_id: &str, object: &GenericObject) -> Result<GenericObject> {
+    pub async fn patch_generic_object(
+        &mut self,
+        object_id: &str,
+        object: &GenericObject,
+    ) -> Result<GenericObject> {
         self.request(
             reqwest::Method::PATCH,
             &format!("/genericObject/{}", object_id),
@@ -225,23 +228,25 @@ impl GoogleWalletClient {
     }
 
     /// List generic objects
-    pub async fn list_generic_objects(&mut self, class_id: Option<&str>) -> Result<GenericObjectListResponse> {
+    pub async fn list_generic_objects(
+        &mut self,
+        class_id: Option<&str>,
+    ) -> Result<GenericObjectListResponse> {
         let path = if let Some(class_id) = class_id {
             format!("/genericObject?classId={}", class_id)
         } else {
             "/genericObject".to_string()
         };
 
-        self.request(
-            reqwest::Method::GET,
-            &path,
-            None::<&()>,
-        )
-        .await
+        self.request(reqwest::Method::GET, &path, None::<&()>).await
     }
 
     /// Add a message to a generic object
-    pub async fn add_message_to_object(&mut self, object_id: &str, message: &AddMessageRequest) -> Result<GenericObject> {
+    pub async fn add_message_to_object(
+        &mut self,
+        object_id: &str,
+        message: &AddMessageRequest,
+    ) -> Result<GenericObject> {
         self.request(
             reqwest::Method::POST,
             &format!("/genericObject/{}/addMessage", object_id),
@@ -251,13 +256,12 @@ impl GoogleWalletClient {
     }
 
     /// Create an event ticket object
-    pub async fn create_event_ticket(&mut self, ticket: &EventTicketObject) -> Result<EventTicketObject> {
-        self.request(
-            reqwest::Method::POST,
-            "/eventTicketObject",
-            Some(ticket),
-        )
-        .await
+    pub async fn create_event_ticket(
+        &mut self,
+        ticket: &EventTicketObject,
+    ) -> Result<EventTicketObject> {
+        self.request(reqwest::Method::POST, "/eventTicketObject", Some(ticket))
+            .await
     }
 
     /// Get an event ticket object
@@ -271,7 +275,11 @@ impl GoogleWalletClient {
     }
 
     /// Update an event ticket object
-    pub async fn update_event_ticket(&mut self, object_id: &str, ticket: &EventTicketObject) -> Result<EventTicketObject> {
+    pub async fn update_event_ticket(
+        &mut self,
+        object_id: &str,
+        ticket: &EventTicketObject,
+    ) -> Result<EventTicketObject> {
         self.request(
             reqwest::Method::PUT,
             &format!("/eventTicketObject/{}", object_id),
@@ -281,13 +289,12 @@ impl GoogleWalletClient {
     }
 
     /// Create a loyalty object
-    pub async fn create_loyalty_object(&mut self, loyalty: &LoyaltyObject) -> Result<LoyaltyObject> {
-        self.request(
-            reqwest::Method::POST,
-            "/loyaltyObject",
-            Some(loyalty),
-        )
-        .await
+    pub async fn create_loyalty_object(
+        &mut self,
+        loyalty: &LoyaltyObject,
+    ) -> Result<LoyaltyObject> {
+        self.request(reqwest::Method::POST, "/loyaltyObject", Some(loyalty))
+            .await
     }
 
     /// Get a loyalty object
@@ -301,7 +308,11 @@ impl GoogleWalletClient {
     }
 
     /// Update a loyalty object
-    pub async fn update_loyalty_object(&mut self, object_id: &str, loyalty: &LoyaltyObject) -> Result<LoyaltyObject> {
+    pub async fn update_loyalty_object(
+        &mut self,
+        object_id: &str,
+        loyalty: &LoyaltyObject,
+    ) -> Result<LoyaltyObject> {
         self.request(
             reqwest::Method::PUT,
             &format!("/loyaltyObject/{}", object_id),
@@ -337,26 +348,21 @@ impl GoogleWalletClient {
     }
 
     /// Generate a save URL for a generic pass object
-    /// 
+    ///
     /// This creates a JWT and calls the Google Wallet API to get a save URL
     /// that can be used to add the pass to a user's wallet.
     pub async fn generate_save_url(&mut self, object: &GenericObject) -> Result<String> {
         let jwt = self.generate_pass_jwt(std::slice::from_ref(object))?;
-        
-        let jwt_resource = JwtResource { jwt };
-        
-        let response: JwtInsertResponse = self.request(
-            reqwest::Method::POST,
-            "/jwt",
-            Some(&jwt_resource),
-        )
-        .await?;
 
-        response.save_uri.ok_or_else(|| {
-            PorterError::ApiError {
-                status: 500,
-                message: "No save URI returned from API".to_string(),
-            }
+        let jwt_resource = JwtResource { jwt };
+
+        let response: JwtInsertResponse = self
+            .request(reqwest::Method::POST, "/jwt", Some(&jwt_resource))
+            .await?;
+
+        response.save_uri.ok_or_else(|| PorterError::ApiError {
+            status: 500,
+            message: "No save URI returned from API".to_string(),
         })
     }
 }

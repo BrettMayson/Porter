@@ -68,11 +68,11 @@
 //! # }
 //! ```
 
+pub mod apple;
 pub mod builder;
 pub mod error;
-pub mod models;
 pub mod google;
-pub mod apple;
+pub mod models;
 
 // Re-export commonly used types
 pub use builder::PassBuilder;

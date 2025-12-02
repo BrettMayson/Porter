@@ -61,7 +61,7 @@ async fn main() -> Result<()> {
     // Step 3: Convert to Google Wallet format and create
     println!("\nConverting to Google Wallet format...");
     let google_pass: GenericObject = unified_pass.clone().into();
-    
+
     let created_pass = client.create_generic_object(&google_pass).await?;
     println!("✓ Pass created in Google Wallet");
 
@@ -69,7 +69,7 @@ async fn main() -> Result<()> {
     println!("\nRetrieving pass and converting to unified model...");
     let retrieved_google = client.get_generic_object(&created_pass.id).await?;
     let retrieved_unified: porter::models::Pass = retrieved_google.into();
-    
+
     println!("✓ Retrieved as unified model:");
     println!("  Title: {}", retrieved_unified.header.title);
     println!("  State: {:?}", retrieved_unified.state);
@@ -82,7 +82,7 @@ async fn main() -> Result<()> {
     )
     .pass_type(PassType::EventTicket)
     .title("Concert Ticket")
-    .subtitle("The Rust Band - DOORS OPEN 7PM")  // Updated
+    .subtitle("The Rust Band - DOORS OPEN 7PM") // Updated
     .background_color("#8B5CF6")
     .foreground_color("#FFFFFF")
     .barcode_with_text(BarcodeFormat::QrCode, "UNIFIED-TICKET-12345", "12345")
@@ -90,11 +90,13 @@ async fn main() -> Result<()> {
     .field("date", "Date", "December 15, 2025")
     .field("seat", "Seat", "A23")
     .field("section", "Section", "Main Floor")
-    .field("doors", "Doors Open", "7:00 PM")  // New field
+    .field("doors", "Doors Open", "7:00 PM") // New field
     .build();
 
     let updated_google: GenericObject = updated_unified.into();
-    let updated_pass = client.update_generic_object(&created_pass.id, &updated_google).await?;
+    let updated_pass = client
+        .update_generic_object(&created_pass.id, &updated_google)
+        .await?;
     println!("✓ Pass updated");
 
     // Generate save URL

@@ -1,8 +1,8 @@
+use porter::error::Result;
 use porter::google::{
     AddMessageRequest, Barcode, GenericClass, GenericObject, GoogleWalletClient,
     GoogleWalletConfig, LocalizedString, Message, TranslatedString,
 };
-use porter::error::Result;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -76,7 +76,10 @@ async fn main() -> Result<()> {
     println!("\nRetrieving pass...");
     let retrieved_pass = client.get_generic_object(&pass_id).await?;
     println!("✓ Retrieved pass: {}", retrieved_pass.id);
-    println!("  State: {}", retrieved_pass.state.as_deref().unwrap_or("UNKNOWN"));
+    println!(
+        "  State: {}",
+        retrieved_pass.state.as_deref().unwrap_or("UNKNOWN")
+    );
 
     // Step 4: Update the pass
     println!("\nUpdating pass...");
@@ -88,8 +91,10 @@ async fn main() -> Result<()> {
         }),
         translated_values: None,
     });
-    
-    let result = client.update_generic_object(&pass_id, &updated_pass).await?;
+
+    let result = client
+        .update_generic_object(&pass_id, &updated_pass)
+        .await?;
     println!("✓ Updated pass: {}", result.id);
 
     // Step 5: Add a message
@@ -108,11 +113,7 @@ async fn main() -> Result<()> {
     // Step 6: List passes
     println!("\nListing passes for class...");
     let list = client.list_generic_objects(Some(&class_id)).await?;
-    let count = list
-        .resources
-        .as_ref()
-        .map(|r| r.len())
-        .unwrap_or(0);
+    let count = list.resources.as_ref().map(|r| r.len()).unwrap_or(0);
     println!("✓ Found {} passes", count);
 
     // Step 7: Generate save URL
@@ -122,6 +123,6 @@ async fn main() -> Result<()> {
     println!("{}", save_url);
 
     println!("\n✅ Example completed successfully!");
-    
+
     Ok(())
 }

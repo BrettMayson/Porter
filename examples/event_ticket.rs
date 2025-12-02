@@ -1,8 +1,8 @@
+use porter::error::Result;
 use porter::google::{
     Barcode, EventSeat, EventTicketObject, GenericObject, GoogleWalletClient, GoogleWalletConfig,
     LocalizedString, TranslatedString,
 };
-use porter::error::Result;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -58,8 +58,11 @@ async fn main() -> Result<()> {
 
     let created_ticket = client.create_event_ticket(&ticket).await?;
     println!("✓ Created ticket: {}", created_ticket.id);
-    println!("  Holder: {}", created_ticket.ticket_holder_name.unwrap_or_default());
-    
+    println!(
+        "  Holder: {}",
+        created_ticket.ticket_holder_name.unwrap_or_default()
+    );
+
     if let Some(seat_info) = &created_ticket.seat_info {
         if let Some(seat) = &seat_info.seat {
             if let Some(default) = &seat.default_value {

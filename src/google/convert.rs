@@ -1,4 +1,6 @@
-use crate::google::types::{Barcode as GoogleBarcode, GenericObject, LocalizedString, TranslatedString};
+use crate::google::types::{
+    Barcode as GoogleBarcode, GenericObject, LocalizedString, TranslatedString,
+};
 use crate::models::{Barcode, BarcodeFormat, Pass, PassState};
 
 /// Convert a unified Pass model to a Google Wallet GenericObject
@@ -10,41 +12,47 @@ impl From<Pass> for GenericObject {
 
 impl From<&Pass> for GenericObject {
     fn from(pass: &Pass) -> Self {
-    let barcode = pass.barcode.as_ref().map(|b| GoogleBarcode {
-        barcode_type: match b.format {
-            BarcodeFormat::QrCode => "QR_CODE",
-            BarcodeFormat::Pdf417 => "PDF_417",
-            BarcodeFormat::Aztec => "AZTEC",
-            BarcodeFormat::Code128 => "CODE_128",
-        }
-        .to_string(),
-        value: b.value.clone(),
-        alternate_text: b.alternate_text.clone(),
-    });
+        let barcode = pass.barcode.as_ref().map(|b| GoogleBarcode {
+            barcode_type: match b.format {
+                BarcodeFormat::QrCode => "QR_CODE",
+                BarcodeFormat::Pdf417 => "PDF_417",
+                BarcodeFormat::Aztec => "AZTEC",
+                BarcodeFormat::Code128 => "CODE_128",
+            }
+            .to_string(),
+            value: b.value.clone(),
+            alternate_text: b.alternate_text.clone(),
+        });
 
-    let state = Some(match pass.state {
-        PassState::Active => "ACTIVE",
-        PassState::Inactive => "INACTIVE",
-        PassState::Expired => "EXPIRED",
-        PassState::Completed => "COMPLETED",
-    }
-    .to_string());
+        let state = Some(
+            match pass.state {
+                PassState::Active => "ACTIVE",
+                PassState::Inactive => "INACTIVE",
+                PassState::Expired => "EXPIRED",
+                PassState::Completed => "COMPLETED",
+            }
+            .to_string(),
+        );
 
-    let card_title = Some(LocalizedString {
-        default_value: Some(TranslatedString {
-            language: "en-US".to_string(),
-            value: pass.header.title.clone(),
-        }),
-        translated_values: None,
-    });
+        let card_title = Some(LocalizedString {
+            default_value: Some(TranslatedString {
+                language: "en-US".to_string(),
+                value: pass.header.title.clone(),
+            }),
+            translated_values: None,
+        });
 
-    let header = pass.header.subtitle.as_ref().map(|subtitle| LocalizedString {
-        default_value: Some(TranslatedString {
-            language: "en-US".to_string(),
-            value: subtitle.clone(),
-        }),
-        translated_values: None,
-    });
+        let header = pass
+            .header
+            .subtitle
+            .as_ref()
+            .map(|subtitle| LocalizedString {
+                default_value: Some(TranslatedString {
+                    language: "en-US".to_string(),
+                    value: subtitle.clone(),
+                }),
+                translated_values: None,
+            });
 
         GenericObject {
             id: pass.id.clone(),
@@ -76,42 +84,42 @@ impl From<GenericObject> for Pass {
 
 impl From<&GenericObject> for Pass {
     fn from(object: &GenericObject) -> Self {
-    let barcode = object.barcode.as_ref().map(|b| {
-        let format = match b.barcode_type.as_str() {
-            "QR_CODE" => BarcodeFormat::QrCode,
-            "PDF_417" => BarcodeFormat::Pdf417,
-            "AZTEC" => BarcodeFormat::Aztec,
-            "CODE_128" => BarcodeFormat::Code128,
-            _ => BarcodeFormat::QrCode, // default
+        let barcode = object.barcode.as_ref().map(|b| {
+            let format = match b.barcode_type.as_str() {
+                "QR_CODE" => BarcodeFormat::QrCode,
+                "PDF_417" => BarcodeFormat::Pdf417,
+                "AZTEC" => BarcodeFormat::Aztec,
+                "CODE_128" => BarcodeFormat::Code128,
+                _ => BarcodeFormat::QrCode, // default
+            };
+
+            Barcode {
+                format,
+                value: b.value.clone(),
+                alternate_text: b.alternate_text.clone(),
+            }
+        });
+
+        let state = match object.state.as_deref() {
+            Some("ACTIVE") => PassState::Active,
+            Some("INACTIVE") => PassState::Inactive,
+            Some("EXPIRED") => PassState::Expired,
+            Some("COMPLETED") => PassState::Completed,
+            _ => PassState::Active, // default
         };
 
-        Barcode {
-            format,
-            value: b.value.clone(),
-            alternate_text: b.alternate_text.clone(),
-        }
-    });
+        let title = object
+            .card_title
+            .as_ref()
+            .and_then(|t| t.default_value.as_ref())
+            .map(|v| v.value.clone())
+            .unwrap_or_default();
 
-    let state = match object.state.as_deref() {
-        Some("ACTIVE") => PassState::Active,
-        Some("INACTIVE") => PassState::Inactive,
-        Some("EXPIRED") => PassState::Expired,
-        Some("COMPLETED") => PassState::Completed,
-        _ => PassState::Active, // default
-    };
-
-    let title = object
-        .card_title
-        .as_ref()
-        .and_then(|t| t.default_value.as_ref())
-        .map(|v| v.value.clone())
-        .unwrap_or_default();
-
-    let subtitle = object
-        .header
-        .as_ref()
-        .and_then(|h| h.default_value.as_ref())
-        .map(|v| v.value.clone());
+        let subtitle = object
+            .header
+            .as_ref()
+            .and_then(|h| h.default_value.as_ref())
+            .map(|v| v.value.clone());
 
         Pass {
             id: object.id.clone(),

@@ -6,31 +6,31 @@ use serde::{Deserialize, Serialize};
 pub struct Pass {
     /// Unique identifier for the pass
     pub id: String,
-    
+
     /// Class ID that this pass belongs to
     pub class_id: String,
-    
+
     /// Pass type
     pub pass_type: PassType,
-    
+
     /// Header information
     pub header: PassHeader,
-    
+
     /// Barcode data (if applicable)
     pub barcode: Option<Barcode>,
-    
+
     /// Custom fields specific to the pass type
     pub fields: Vec<PassField>,
-    
+
     /// Links to related passes or offers
     pub linked_objects: Vec<String>,
-    
+
     /// State of the pass
     pub state: PassState,
-    
+
     /// Validity period
     pub valid_time_interval: Option<TimeInterval>,
-    
+
     /// Last updated timestamp
     pub updated_at: Option<DateTime<Utc>>,
 }

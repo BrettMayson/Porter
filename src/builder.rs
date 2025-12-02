@@ -1,16 +1,16 @@
 use crate::models::*;
 
 /// Builder for creating passes with a fluent API
-/// 
+///
 /// This provides a platform-agnostic way to create passes that can then
 /// be converted to Google Wallet or Apple Wallet specific formats.
-/// 
+///
 /// # Example
-/// 
+///
 /// ```
 /// use porter::builder::PassBuilder;
 /// use porter::models::{PassType, BarcodeFormat};
-/// 
+///
 /// let pass = PassBuilder::new("issuer_id.pass_001", "issuer_id.class_001")
 ///     .pass_type(PassType::EventTicket)
 ///     .title("Concert Ticket")
@@ -90,11 +90,7 @@ impl PassBuilder {
     }
 
     /// Add a barcode to the pass
-    pub fn barcode(
-        mut self,
-        format: BarcodeFormat,
-        value: impl Into<String>,
-    ) -> Self {
+    pub fn barcode(mut self, format: BarcodeFormat, value: impl Into<String>) -> Self {
         self.pass.barcode = Some(Barcode {
             format,
             value: value.into(),
@@ -168,10 +164,7 @@ impl PassBuilder {
         if let Some(ref mut interval) = self.pass.valid_time_interval {
             interval.start = start;
         } else {
-            self.pass.valid_time_interval = Some(TimeInterval {
-                start,
-                end: None,
-            });
+            self.pass.valid_time_interval = Some(TimeInterval { start, end: None });
         }
         self
     }
