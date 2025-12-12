@@ -26,6 +26,7 @@ async fn main() -> Result<()> {
         id: class_id.clone(),
         issuer_name: Some("Porter Unified API Demo".to_string()),
         review_status: Some("UNDER_REVIEW".to_string()),
+        class_template_info: None,
     };
 
     match client.create_generic_class(&class).await {

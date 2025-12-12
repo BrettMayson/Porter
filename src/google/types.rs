@@ -33,14 +33,17 @@ pub struct GenericObject {
 }
 
 /// Google Wallet Generic Class
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct GenericClass {
+    #[serde(default)]
     pub id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub issuer_name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub review_status: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none", default)]
+    pub class_template_info: Option<ClassTemplateInfo>,
 }
 
 /// Localized string for multi-language support
@@ -258,4 +261,154 @@ pub struct TextModuleData {
     pub localized_header: Option<LocalizedString>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub localized_body: Option<LocalizedString>,
+}
+
+/// Template information about how the class should be displayed
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ClassTemplateInfo {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub card_template_override: Option<CardTemplateOverride>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub details_template_override: Option<DetailsTemplateOverride>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub list_template_override: Option<ListTemplateOverride>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub card_barcode_section_details: Option<CardBarcodeSectionDetails>,
+}
+
+/// Override for the card view
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CardTemplateOverride {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub card_row_template_infos: Option<Vec<CardRowTemplateInfo>>,
+}
+
+/// Template for a row in the card
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CardRowTemplateInfo {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub one_item: Option<CardRowOneItem>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub two_items: Option<CardRowTwoItems>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub three_items: Option<CardRowThreeItems>,
+}
+
+/// Template for a row containing one item
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CardRowOneItem {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub item: Option<TemplateItem>,
+}
+
+/// Template for a row containing two items
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CardRowTwoItems {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub start_item: Option<TemplateItem>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub end_item: Option<TemplateItem>,
+}
+
+/// Template for a row containing three items
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CardRowThreeItems {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub start_item: Option<TemplateItem>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub middle_item: Option<TemplateItem>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub end_item: Option<TemplateItem>,
+}
+
+/// Template item that can display field data
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TemplateItem {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub first_value: Option<FieldSelector>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub predefined_item: Option<String>,
+}
+
+/// Field selector for referencing fields
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FieldSelector {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub fields: Option<Vec<FieldReference>>,
+}
+
+/// Reference to a specific field
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FieldReference {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub field_path: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub date_format: Option<String>,
+}
+
+/// Override for the details view
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DetailsTemplateOverride {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub details_item_infos: Option<Vec<DetailsItemInfo>>,
+}
+
+/// Item info for the details view
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct DetailsItemInfo {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub item: Option<TemplateItem>,
+}
+
+/// Override for the list view
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ListTemplateOverride {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub first_row_option: Option<FirstRowOption>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub second_row_option: Option<FieldSelector>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub third_row_option: Option<FieldSelector>,
+}
+
+/// Options for the first row in list view
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct FirstRowOption {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub field_option: Option<FieldSelector>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub transit_option: Option<String>,
+}
+
+/// Card barcode section details
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CardBarcodeSectionDetails {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub first_top_detail: Option<BarcodeSectionDetail>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub second_top_detail: Option<BarcodeSectionDetail>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub first_bottom_detail: Option<BarcodeSectionDetail>,
+}
+
+/// Barcode section detail
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BarcodeSectionDetail {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub field_selector: Option<FieldSelector>,
 }
