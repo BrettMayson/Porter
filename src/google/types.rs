@@ -28,6 +28,8 @@ pub struct GenericObject {
     pub valid_time_interval: Option<TimeInterval>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub linked_offer_ids: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub text_modules_data: Option<Vec<TextModuleData>>,
 }
 
 /// Google Wallet Generic Class
@@ -240,4 +242,20 @@ pub struct JwtResource {
 pub struct JwtInsertResponse {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub save_uri: Option<String>,
+}
+
+/// Text module data for displaying custom fields
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TextModuleData {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub header: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub body: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub localized_header: Option<LocalizedString>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub localized_body: Option<LocalizedString>,
 }

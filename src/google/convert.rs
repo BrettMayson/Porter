@@ -1,5 +1,5 @@
 use crate::google::types::{
-    Barcode as GoogleBarcode, GenericObject, LocalizedString, TranslatedString,
+    Barcode as GoogleBarcode, GenericObject, LocalizedString, TextModuleData, TranslatedString,
 };
 use crate::models::{Barcode, BarcodeFormat, Pass, PassState};
 
@@ -54,6 +54,23 @@ impl From<&Pass> for GenericObject {
                 translated_values: None,
             });
 
+        let text_modules_data = if pass.fields.is_empty() {
+            None
+        } else {
+            Some(
+                pass.fields
+                    .iter()
+                    .map(|field| TextModuleData {
+                        id: Some(field.key.clone()),
+                        header: Some(field.label.clone()),
+                        body: Some(field.value.clone()),
+                        localized_header: None,
+                        localized_body: None,
+                    })
+                    .collect(),
+            )
+        };
+
         GenericObject {
             id: pass.id.clone(),
             class_id: pass.class_id.clone(),
@@ -71,6 +88,7 @@ impl From<&Pass> for GenericObject {
             } else {
                 Some(pass.linked_objects.clone())
             },
+            text_modules_data,
         }
     }
 }
@@ -121,6 +139,22 @@ impl From<&GenericObject> for Pass {
             .and_then(|h| h.default_value.as_ref())
             .map(|v| v.value.clone());
 
+        let fields = object
+            .text_modules_data
+            .as_ref()
+            .map(|modules| {
+                modules
+                    .iter()
+                    .map(|module| crate::models::PassField {
+                        key: module.id.clone().unwrap_or_default(),
+                        label: module.header.clone().unwrap_or_default(),
+                        value: module.body.clone().unwrap_or_default(),
+                        text_alignment: None,
+                    })
+                    .collect()
+            })
+            .unwrap_or_default();
+
         Pass {
             id: object.id.clone(),
             class_id: object.class_id.clone(),
@@ -133,7 +167,7 @@ impl From<&GenericObject> for Pass {
                 foreground_color: None,
             },
             barcode,
-            fields: vec![],
+            fields,
             linked_objects: object.linked_offer_ids.clone().unwrap_or_default(),
             state,
             valid_time_interval: None,
@@ -205,5 +239,100 @@ mod tests {
         assert_eq!(pass.state, PassState::Active);
         assert!(pass.barcode.is_some());
         assert_eq!(pass.header.title, "Test Card");
+    }
+
+    #[test]
+    fn test_pass_fields_to_text_modules() {
+        let pass = Pass {
+            id: "test.pass".to_string(),
+            class_id: "test.class".to_string(),
+            pass_type: crate::models::PassType::Generic,
+            header: crate::models::PassHeader {
+                title: "Test Pass".to_string(),
+                subtitle: None,
+                logo: None,
+                background_color: None,
+                foreground_color: None,
+            },
+            barcode: None,
+            fields: vec![
+                crate::models::PassField {
+                    key: "field1".to_string(),
+                    label: "Label 1".to_string(),
+                    value: "Value 1".to_string(),
+                    text_alignment: None,
+                },
+                crate::models::PassField {
+                    key: "field2".to_string(),
+                    label: "Label 2".to_string(),
+                    value: "Value 2".to_string(),
+                    text_alignment: None,
+                },
+            ],
+            linked_objects: vec![],
+            state: PassState::Active,
+            valid_time_interval: None,
+            updated_at: None,
+        };
+
+        let google_object: GenericObject = pass.into();
+
+        assert!(google_object.text_modules_data.is_some());
+        let modules = google_object.text_modules_data.unwrap();
+        assert_eq!(modules.len(), 2);
+
+        assert_eq!(modules[0].id, Some("field1".to_string()));
+        assert_eq!(modules[0].header, Some("Label 1".to_string()));
+        assert_eq!(modules[0].body, Some("Value 1".to_string()));
+
+        assert_eq!(modules[1].id, Some("field2".to_string()));
+        assert_eq!(modules[1].header, Some("Label 2".to_string()));
+        assert_eq!(modules[1].body, Some("Value 2".to_string()));
+    }
+
+    #[test]
+    fn test_text_modules_to_pass_fields() {
+        let google_object = GenericObject {
+            id: "test.object".to_string(),
+            class_id: "test.class".to_string(),
+            state: Some("ACTIVE".to_string()),
+            barcode: None,
+            card_title: Some(LocalizedString {
+                default_value: Some(TranslatedString {
+                    language: "en-US".to_string(),
+                    value: "Test Card".to_string(),
+                }),
+                translated_values: None,
+            }),
+            text_modules_data: Some(vec![
+                TextModuleData {
+                    id: Some("module1".to_string()),
+                    header: Some("Header 1".to_string()),
+                    body: Some("Body 1".to_string()),
+                    localized_header: None,
+                    localized_body: None,
+                },
+                TextModuleData {
+                    id: Some("module2".to_string()),
+                    header: Some("Header 2".to_string()),
+                    body: Some("Body 2".to_string()),
+                    localized_header: None,
+                    localized_body: None,
+                },
+            ]),
+            ..Default::default()
+        };
+
+        let pass: Pass = google_object.into();
+
+        assert_eq!(pass.fields.len(), 2);
+
+        assert_eq!(pass.fields[0].key, "module1");
+        assert_eq!(pass.fields[0].label, "Header 1");
+        assert_eq!(pass.fields[0].value, "Body 1");
+
+        assert_eq!(pass.fields[1].key, "module2");
+        assert_eq!(pass.fields[1].label, "Header 2");
+        assert_eq!(pass.fields[1].value, "Body 2");
     }
 }
