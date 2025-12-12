@@ -79,7 +79,7 @@ impl From<&Pass> for GenericObject {
             card_title,
             header,
             subheader: None,
-            logo: None,
+            logo: pass.header.logo.as_ref().and_then(|l| l.into()),
             hex_background_color: pass.header.background_color.clone(),
             hero_image: None,
             valid_time_interval: None,
@@ -162,7 +162,7 @@ impl From<&GenericObject> for Pass {
             header: crate::models::PassHeader {
                 title,
                 subtitle,
-                logo: None,
+                logo: object.logo.as_ref().and_then(|l| l.into()),
                 background_color: object.hex_background_color.clone(),
                 foreground_color: None,
             },
@@ -173,6 +173,24 @@ impl From<&GenericObject> for Pass {
             valid_time_interval: None,
             updated_at: None,
         }
+    }
+}
+
+impl From<&crate::models::Image> for Option<crate::google::types::Image> {
+    fn from(image: &crate::models::Image) -> Self {
+        Some(crate::google::types::Image {
+            source_uri: super::ImageUri { uri: image.source_uri.clone(), description: image.alt_text.clone() },
+            content_description: None,
+        })
+    }
+}
+
+impl From<&crate::google::types::Image> for Option<crate::models::Image> {
+    fn from(image: &crate::google::types::Image) -> Self {
+        Some(crate::models::Image {
+            source_uri: image.source_uri.uri.clone(),
+            alt_text: image.source_uri.description.clone(),
+        })
     }
 }
 
